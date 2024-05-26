@@ -38,7 +38,7 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        //
+        return view('resources.post.show', ['post' => $post]);
     }
 
     /**
@@ -54,7 +54,7 @@ class PostController extends Controller
      */
     public function update(UpdatePostRequest $request, Post $post)
     {
-        //
+       //
     }
 
     /**
