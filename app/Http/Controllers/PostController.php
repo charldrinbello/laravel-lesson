@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
+use Illuminate\Support\Facades\Auth;
+
+use function PHPUnit\Framework\is_null;
 
 class PostController extends Controller
 {
@@ -12,8 +15,9 @@ class PostController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        $posts = Post::all();
+    {        
+        $this->authorize('viewAny', Post::class);
+        $posts = Post::where('user_id', Auth::user()->id)->get();
         return view('resources.post.index', ['posts' => $posts]);
     }
 
@@ -29,14 +33,15 @@ class PostController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(StorePostRequest $request)
-    {
-        
+    {                
         Post::create([
+            'user_id' => Auth::user()->id,
             'subject' => $request->subject,
             'post' => $request->post,
-            'status' => (is_null($request->status) ? 0 : 1)
+            'status' => ($request->status == "on" ? 1 : 0)
         ]);
-        return redirect()->route('post.index')->with('message', 'Post Successfully Saved!');
+
+        return redirect()->route('post.index')->with('message', 'Post Succesfully Saved!');        
     }
 
     /**
@@ -44,6 +49,7 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
+        $this->authorize('view', $post);
         return view('resources.post.show', ['post' => $post]);
     }
 
@@ -52,6 +58,7 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
+        $this->authorize('view', $post);
         return view('resources.post.edit', ['post' => $post]);
     }
 
@@ -59,14 +66,16 @@ class PostController extends Controller
      * Update the specified resource in storage.
      */
     public function update(UpdatePostRequest $request, Post $post)
-    {
+    {                
+        $this->authorize('view', $post);
         $post->update([
+            'user_id' => Auth::user()->id,
             'subject' => $request->subject,
             'post' => $request->post,
-            'status' => (is_null($request->status) ? 0 : 1)
+            'status' => ($request->status == "on" ? 1 : 0)
         ]);
-        return redirect()->route('post.index')->with('message', 'Post Successfully Saved!');
 
+        return redirect()->route('post.index')->with('message', 'Post Succesfully Saved!');        
     }
 
     /**
@@ -74,7 +83,13 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
+        $this->authorize('view', $post);
         $post->delete();
-        return redirect()->route('post.index')->with('message', 'Post Successfully Deleted!');
+        return redirect()->route('post.index')->with('message', 'Post Succesfully Deleted!');        
+    }
+
+    public function postIndex() {
+        $posts = Post::all();
+        return view('pages.index', ['posts' => $posts]);
     }
 }
