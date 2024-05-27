@@ -23,4 +23,10 @@ class PostFactory extends Factory
             'status' => 0,
         ];
     }
+    
+        public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
 }
